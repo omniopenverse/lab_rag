@@ -48,7 +48,7 @@ Hardware: At least 8GB RAM; GPU recommended for faster LLM inference.
 
 - Clone the repository:
 ```
-git clone <repository-url>
+git clone <https://github.com/omniopenverse/lab_rag.git>
 cd lab_rag
 ```
 - Install dependencies from the provided requirements.txt:
