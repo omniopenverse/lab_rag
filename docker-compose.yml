@@ -1,24 +1,4 @@
 services:
-  ollama:
-    build:
-      context: ollama
-      dockerfile: Dockerfile
-    container_name: ollama
-    environment:
-      OLLAMA_BASE_URL: ${SERVER_HOST:-127.0.0.1}
-    hostname: ollama
-    image: lag_rag/ollama:local
-    restart: unless-stopped
-    ports:
-      - "${SERVER_HOST:-127.0.0.1}:11434:11434/tcp"
-    networks:
-      common: null
-    volumes:
-      - type: volume
-        source: ollama_data
-        target: /root/.ollama
-        volume: {}
-
   app:
     build:
       context: app
@@ -27,35 +7,34 @@ services:
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
     hostname: app
-    image: lag_rag/app:local
+    image: llm_works/app:local
     restart: unless-stopped
     networks:
       common: null
     ports:
-      - "8501:8501/tcp"
+      - "${UNIVERSE_HOST:?}:8501:8501/tcp"
     depends_on:
       - ollama
 
-  jupyter:
+  ollama:
     build:
-      context: jupyter
+      context: ollama
       dockerfile: Dockerfile
-    container_name: jupyter
+    container_name: ollama
     environment:
-      JUPYTER_TOKEN: token
-    hostname: jupyter
-    image: lag_rag/jupyter:local
+      OLLAMA_BASE_URL: ${UNIVERSE_HOST:?}:11434
+    hostname: ollama
+    image: llm_works/ollama:local
+    restart: unless-stopped
     ports:
-      - "${SERVER_HOST:-127.0.0.1}:8888:8888/tcp"
+      - "${UNIVERSE_HOST:?}:11434:11434/tcp"
     networks:
       common: null
-    restart: unless-stopped
     volumes:
-      - type: bind
-        source: ./jupyter/src
-        target: /home/jovyan/work
-        bind:
-          create_host_path: false
+      - type: volume
+        source: ollama_data
+        target: /root/.ollama
+        volume: {}
 
   openwebui:
     build:
@@ -65,7 +44,7 @@ services:
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
     hostname: openwebui
-    image: lag_rag/openwebui:local
+    image: llm_works/openwebui:local
     restart: unless-stopped
     volumes:
       - type: volume
@@ -75,7 +54,28 @@ services:
     networks:
       common: null
     ports:
-      - "${SERVER_HOST:-127.0.0.1}:8080:8080/tcp"
+      - "${UNIVERSE_HOST:?}:8080:8080/tcp"
+
+  jupyter:
+    build:
+      context: jupyter
+      dockerfile: Dockerfile
+    container_name: jupyter
+    environment:
+      JUPYTER_TOKEN: token
+    hostname: jupyter
+    image: llm_works/jupyter:local
+    ports:
+      - "${UNIVERSE_HOST:?}:8888:8888/tcp"
+    networks:
+      common: null
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./jupyter/src
+        target: /home/jovyan/work
+        bind:
+          create_host_path: false
 
 volumes:
   ollama_data:

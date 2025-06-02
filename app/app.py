@@ -42,14 +42,14 @@ if pdf_file and not st.session_state.conversation_chain:
 
             # Create embeddings and vector store
             embeddings = OllamaEmbeddings(
-                base_url=getenv("http://localhost:11434/"),
+                base_url=getenv("OLLAMA_BASE_URL"),
                 model="nomic-embed-text:v1.5"
             )
             vectorstore = FAISS.from_texts(chunks, embeddings)
 
             # Initialize LLM without terminal output
             llm = Ollama(
-                base_url=getenv("http://ollama:11434/"),
+                base_url=getenv("OLLAMA_BASE_URL"),
                 model="llama3.2:1b",
                 temperature=0,
                 callback_manager=None  # Remove the terminal output callback
